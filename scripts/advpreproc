@@ -18,7 +18,24 @@ cd $WORKDIR/Diff/$subj/preproc
 #Extract encoding
 
 mrinfo rawdataLR.mif -export_grad_mrtrix rawencoding.b -force
-mrinfo rawdataRL.mif -export_grad_mrtrix rawrevencoding.b -force
+#mrinfo rawdataRL.mif -export_grad_mrtrix rawrevencoding.b -force
+
+sed -i '1s/.*/0 0 0 0/' rawencoding.b
+sed -i '17s/.*/0 0 0 0/' rawencoding.b 
+sed -i '33s/.*/0 0 0 0/' rawencoding.b
+sed -i '49s/.*/0 0 0 0/' rawencoding.b
+
+#sed -i '1s/.*/0 0 0 0/' rawrevencoding.b
+#sed -i '17s/.*/0 0 0 0/' rawrevencoding.b
+#sed -i '33s/.*/0 0 0 0/' rawrevencoding.b
+#sed -i '49s/.*/0 0 0 0/' rawrevencoding.b
+
+mrconvert rawdataLR.mif rawdataLRgrad.mif -grad rawencoding.b -set_property PhaseEncodingDirection i -nthreads $ncpus -force 
+mrconvert rawdataRL.mif rawdataRLgrad.mif -grad rawencoding.b -set_property PhaseEncodingDirection i- -nthreads $ncpus -force
+
+mv rawdataLRgrad.mif rawdataLR.mif
+mv rawdataRLgrad.mif rawdataRL.mif
+
 
 #if [ $ismosiac = 1 ];
 #then
@@ -73,9 +90,9 @@ rm rawdataRLdnstr.mif
 
 #Preprocessing steps including eddy correction & bias correction
 
-mrcat rawdataLRdn.mif rawdataRLdn.mif allDWIs.mif -axis 3 -force -nthreads $ncpus
+mrcat rawdataRLdn.mif rawdataLRdn.mif allDWIs.mif -axis 3 -force -nthreads $ncpus
 echo "Preprocessing command...:dwipreproc -rpe_all -export_grad_mrtrix adjencoding.b -pe_dir LR allDWIs.mif eddycorr.mif -eddy_options " --repol --data_is_shelled --mb=3 --ol_type=both " -nthreads $ncpus -force -tempdir . -nocleanup"
-dwipreproc -rpe_all -export_grad_mrtrix adjencoding.b -pe_dir LR allDWIs.mif eddycorr.mif -eddy_options " --repol --data_is_shelled --mb=3 --ol_type=both " -nthreads $ncpus -force -tempdir . -nocleanup
+dwipreproc -rpe_all -export_grad_mrtrix adjencoding.b -pe_dir RL allDWIs.mif eddycorr.mif -eddy_options " --repol --data_is_shelled --mb=3 --ol_type=both " -nthreads $ncpus -force -tempdir . -nocleanup -debug
 
 #dwiextract eddycorr.mif -bzero - | mrmath -axis 3 - mean eddymeanb0.nii -force -nthreads $ncpus
 #bet2 eddymeanb0.nii eddymeanb0bet -m -f 0.15
