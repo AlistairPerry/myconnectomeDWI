@@ -1,0 +1,102 @@
+#!/bin/bash
+# file: advpreproc
+# usage: advpreproc subj workdir ismosaic ncpus fullreverseseq ismultiband
+
+# note: for only with acquisitions with reverse sequnce - i.e. base subject directory must contain rawdataLR.mif and its reverse sequence rawdataRL.mif
+
+subj=$1
+WORKDIR=$2
+
+mkdir -p $WORKDIR/Diff/$subj/preproc 
+
+rsync *rawdata* $WORKDIR/Diff/$subj/preproc
+
+#rsync T1.nii $WORKDIR/Diff/$subj/preproc
+
+cd $WORKDIR/Diff/$subj/preproc
+
+#Extract encoding
+
+mrinfo rawdataLR.mif -export_grad_mrtrix rawencoding.b -force
+mrinfo rawdataRL.mif -export_grad_mrtrix rawrevencoding.b -force
+
+#if [ $ismosiac = 1 ];
+#then
+
+#	mrconvert rawdataLR.mif rawdataLR.nii -force -nthreads $ncpus
+
+#	nvols=$(fslnvols rawdataLR.nii)
+#	adjvols=$(expr $nvols - 1)
+
+#	fslroi rawdataLR.nii rawdataLRrem 1 $adjvols
+
+#	sed '1d' rawencoding.b > rawencodingrem.b
+#	mrconvert rawdataLRrem.nii.gz rawdataLRrem.mif -force -grad rawencodingrem.b -stride +1,2,3,4 -nthreads $ncpus
+
+#	mv rawdataLRrem.mif rawdataLR.mif
+
+#fi
+
+#if [ $ismosiac = 1 ] && [ $fullreverseseq = 1 ]; then
+
+#	mrconvert rawdataRL.mif rawdataRL.nii -force -nthreads $ncpus
+#	fslroi rawdataRL.nii rawdataRLrem 1 $adjvols
+#	sed '1d' rawrevencoding.b > rawrevencodingrem.b
+#       mrconvert rawdataRLrem.nii.gz rawdataRLrem.mif -force -grad rawrevencodingrem.b -stride +1,2,3,4 -nthreads $ncpus
+#	mv rawdataRLrem.mif rawdataRL.mif
+	
+#else
+	
+#	dwiextract rawdataRL.mif -bzero rawdataRLrem.mif -force
+#	mv rawdataRLrem.mif rawdataRL.mif
+	
+#fi
+
+#Denoise
+
+dwidenoise rawdataLR.mif rawdataLRdn.mif -force -nthreads $ncpus
+dwidenoise rawdataRL.mif rawdataRLdn.mif -force -nthreads $ncpus
+
+mrconvert rawdataLRdn.mif rawdataLRdnstr.mif -stride +1,2,3,4 -force -nthreads $ncpus
+mrconvert rawdataLRdnstr.mif  rawdataLRdn.mif  -force -nthreads $ncpus
+
+mrconvert rawdataRLdn.mif rawdataRLdnstr.mif -stride +1,2,3,4 -force -nthreads $ncpus
+mrconvert rawdataRLdnstr.mif  rawdataRLdn.mif -stride +1,2,3,4 -force -nthreads $ncpus
+
+rm rawdataLRdnstr.mif
+rm rawdataRLdnstr.mif 
+
+#Generate a b0 base image for each phase-encoding direction
+
+#mrconvert rawdataLRdn.mif b0AP.mif -coord 3 0 -force -nthreads $ncpus
+#mrconvert rawdataRLdn.mif b0PA.mif -coord 3 0 -force -nthreads $ncpus
+
+#Preprocessing steps including eddy correction & bias correction
+
+mrcat rawdataLRdn.mif rawdataRLdn.mif allDWIs.mif -axis 3 -force -nthreads $ncpus
+echo "Preprocessing command...:dwipreproc -rpe_all -export_grad_mrtrix adjencoding.b -pe_dir LR allDWIs.mif eddycorr.mif -eddy_options " --repol --data_is_shelled --mb=3 --ol_type=both " -nthreads $ncpus -force -tempdir . -nocleanup"
+dwipreproc -rpe_all -export_grad_mrtrix adjencoding.b -pe_dir LR allDWIs.mif eddycorr.mif -eddy_options " --repol --data_is_shelled --mb=3 --ol_type=both " -nthreads $ncpus -force -tempdir . -nocleanup
+
+#dwiextract eddycorr.mif -bzero - | mrmath -axis 3 - mean eddymeanb0.nii -force -nthreads $ncpus
+#bet2 eddymeanb0.nii eddymeanb0bet -m -f 0.15
+
+dwishellmath eddycorr.mif mean meaneddyshell.mif -nthreads $ncpus -force
+
+mrconvert meaneddyshell.mif meaneddyb5shell.nii -coord 3 0 -nthreads $ncpus -force
+
+bet2 meaneddyb5shell.nii meaneddyb5shellbet -m -f 0.15
+
+dwibiascorrect -mask meaneddyb5shellbet_mask.nii.gz -fsl eddycorr.mif biascorr.mif -nthreads $ncpus -force
+
+dwishellmath biascorr.mif mean meanbiasshell.mif -nthreads $npcus -force
+
+#Create tensor and FA images
+
+
+mrconvert meanbiasshell.mif meanbiasb5shell.nii -coord 3 0 -nthreads $ncpus -force
+
+bet2 meanbiasb5shell.nii meanbiasb5shellbet -m -f 0.15
+
+dwi2tensor biascorr.mif dt.mif -mask meanbiasb5shellbet_mask.nii.gz -nthreads $ncpus -force
+
+tensor2metric dt.mif -fa fa.nii -nthreads $ncpus -force
