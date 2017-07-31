@@ -1,0 +1,101 @@
+#!/bin/bash
+#file : segparcT1
+#usage: segparcT1 <subj> <WORKDIR> parctype PRESEGDIR(optional)
+
+#FSparctype options = "DES" (desikan, 68 rois) or DST (destrieux; 148)
+
+
+subj=$1
+WORKDIR=$2
+parctype=$3
+PRESEGDIR=$4
+
+mkdir -p ${WORKDIR}/segparc/${subj}
+
+SUBJECTS_DIR=${WORKDIR}/FS
+
+if [ -n "$4" ]; then
+echo "SEGMENTATION HAS ALREADY BEEN PERFORMED"
+
+subjPRESEGDIR=${WORKDIR}/${PRESEGDIR}/${subj}
+
+echo "Subject segmentations located in ${subjPRESEGDIR}"
+
+fi
+
+
+#prepare anatomical volume for segmentation, parcellation correction
+
+mrconvert $SUBJECTS_DIR/$subj/mri/brain.mgz brainFS.nii -stride +1,2,3 -nthreads $ncpus -force
+
+mrconvert $SUBJECTS_DIR/$subj/mri/T1.mgz FS.nii -nthreads $ncpus -force
+
+bet2 T1.nii T1bet -f 0.15
+
+mrconvert $SUBJECTS_DIR/$subj/mri/brain.mgz brainFSsp.nii -nthreads $ncpus -force
+
+flirt -ref T1bet.nii.gz -in brainFSsp.nii -dof 6 -out FS2FSL -omat FS2FSL.mat
+
+convert_xfm -omat FSL2FS.mat -inverse FS2FSL.mat
+
+bet2 FS2FSL.nii.gz FS2FSLbet -f 0.15 -m
+
+fslmaths T1bet.nii.gz -mas FS2FSLbet_mask.nii.gz T1betFSmasked.nii.gz
+
+
+#fast -B --nopve T1betFSmasked.nii.gz
+
+#5ttgen fsl T1betFSmasked.nii.gz -nocrop -premasked -sgm_amyg_hipp 5TTfsl.nii -nthreads $ncpus -force -tempdir . -nocleanup
+
+if [ -n "$4" ]; then
+echo "SEGMENTATION already perform | expect tissues to have filenames: GM.nii WM.nii CSF.nii"
+
+5ttgen_manual T1.nii 5TT.nii ${subjPRESEGDIR}
+
+else
+
+5ttgen_manual T1.nii 5TT.nii
+
+fi
+
+5tt2gmwmi 5TT.nii 5TTgmwmi.nii -nthreads $ncpus -force
+
+if [ $parctype=="DES" ]; then
+	echo "${parctype} parcellation being constructed"
+	labelconvert $SUBJECTS_DIR/$subj/mri/aparc+aseg.mgz $FREESURFER_HOME/FreeSurferColorLUT.txt $MRTRIX/share/mrtrix3/labelconvert/fs_default.txt parc.nii -nthreads $ncpus -force
+elif [ $parctype=="DST" ]; then
+	echo "${parctype} parcellation being constructed"
+	labelconvert $SUBJECTS_DIR/$subj/mri/aparc.a2009s+aseg.mgz $FREESURFER_HOME/FreeSurferColorLUT.txt $MRTRIX/share/mrtrix3/labelconvert/fs_a2009s.txt parc.nii -nthreads $ncpus -force
+fi
+
+flirt -ref T1bet.nii.gz -in parc.nii -applyxfm -init FS2FSL.mat -interp nearestneighbour -out parcFSL.nii.gz
+
+rm parc_fixsubcort.nii
+
+mrconvert parcFSL.nii.gz parcFSLtempstr.nii.gz -stride -1,2,3 -force -nthreads $ncpus
+
+if [ $parctype=="DES" ]; then
+       labelsgmfix parcFSLtempstr.nii.gz T1betFSmasked_restore.nii.gz $MRTRIX/share/mrtrix3/labelconvert/fs_default.txt parc_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
+elif [ $parctype=="DST" ]; then
+       labelsgmfix parcFSLtempstr.nii.gz T1betFSmasked_restore.nii.gz $MRTRIX/share/mrtrix3/labelconvert/fs_a2009s.txt parc_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
+fi
+
+mrconvert parc_fixsubcort.nii parc_fixsubcortstr.nii -stride +1,2,3 -force -nthreads $ncpus
+
+mv parc_fixsubcortstr.nii parc_fixsubcort.nii
+
+rm parcFSLtempstr.nii.gz
+
+
+#Coregistrations setup
+
+#Move other files from T1 space
+
+transformconvert FS2FSL.mat brainFSsp.nii T1bet.nii.gz flirt_import FS2FSLMR.mat -force -nthreads $ncpus
+
+mrtransform 5TT.nii 5TTFSspmasked.nii -linear FS2FSLMR.mat -inverse -force -nthreads $ncpus
+
+mrtransform 5TTgmwmi.nii 5TTFSspgmwmi.nii -linear FS2FSLMR.mat -inverse -force -nthreads $ncpus
+
+
+flirt -ref brainFSsp.nii -in parc_fixsubcort.nii -applyxfm -init FSL2FS.mat -interp nearestneighbour -out parc_fixsubcortFS.nii.gz
