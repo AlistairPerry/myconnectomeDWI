@@ -1,0 +1,27 @@
+#!/bin/bash 
+#file: advfulldiffsteps
+
+subj=$1
+WORKDIR=$2
+#FS_DIR=$3
+
+#arguments to be set
+parc=DST
+numfibers=25M
+
+#Full diffusion pipeline, from pre-processing to connectome construction - using the advanced version
+
+#Advanced preprocessing
+#Parameters: mosaic fullrevsequence multiband (1 if yes)
+
+advpreproc $subj $WORKDIR
+ 
+#Segmentation, parcellation and co-registration of T1 images
+
+segparccoregT1 $WORKDIR $parc CATSEG
+
+#Fiber construction and connectome construction
+
+advfibertrackandcntmecon $subj $WORKDIR $numfibers $parc
+
+

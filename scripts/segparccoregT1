@@ -4,13 +4,10 @@
 
 #FSparctype options = "DES" (desikan, 68 rois) or DST (destrieux; 148)
 
-
-subj=$1
-WORKDIR=$2
-parctype=$3
-PRESEGDIR=$4
-
-mkdir -p ${WORKDIR}/segparc/${subj}
+subj=011
+WORKDIR=$1
+parctype=$2
+PRESEGDIR=$3
 
 SUBJECTS_DIR=${WORKDIR}/FS
 
@@ -89,6 +86,15 @@ rm parcFSLtempstr.nii.gz
 
 #Coregistrations setup
 
+bbregister --s $subj --mov biasmeanb0bet.nii.gz --init-fsl --reg register.dat --dti --fslmat diff2FS.mat
+
+transformconvert diff2FS.mat biasmeanb0bet.nii.gz $SUBJECTS_DIR/$subj/mri/brain.mgz flirt_import diff2FSMR.mat -force
+
+mrtransform $SUBJECTS_DIR/$subj/mri/brain.mgz rFS.nii -linear diff2FSMR.mat -inverse -force
+
+mrtransform $SUBJECTS_DIR/$subj/mri/brain.mgz rFSrg.nii -linear diff2FSMR.mat -inverse -template fa.nii -force
+
+
 #Move other files from T1 space
 
 transformconvert FS2FSL.mat brainFSsp.nii T1bet.nii.gz flirt_import FS2FSLMR.mat -force -nthreads $ncpus
@@ -98,4 +104,18 @@ mrtransform 5TT.nii 5TTFSspmasked.nii -linear FS2FSLMR.mat -inverse -force -nthr
 mrtransform 5TTgmwmi.nii 5TTFSspgmwmi.nii -linear FS2FSLMR.mat -inverse -force -nthreads $ncpus
 
 
+#Now into diff
+
+mrtransform 5TTFSspgmwmi.nii r5TTgmwmi.nii -linear diff2FSMR.mat -inverse -force
+
+mrtransform 5TTFSspmasked.nii r5TT.nii -linear diff2FSMR.mat -inverse -force
+
+convert_xfm -omat FSL2FS.mat -inverse FS2FSL.mat
+
 flirt -ref brainFSsp.nii -in parc_fixsubcort.nii -applyxfm -init FSL2FS.mat -interp nearestneighbour -out parc_fixsubcortFS.nii.gz
+
+convert_xfm -omat FS2diff.mat  -inverse diff2FS.mat
+
+flirt -ref fa.nii -in parc_fixsubcortFS.nii.gz -applyxfm -init FS2diff.mat -out rparc_fixsubcort.nii.gz  -interp nearestneighbour
+
+gunzip -f rparc_fixsubcort.nii.gz

@@ -36,39 +36,6 @@ mrconvert rawdataRL.mif rawdataRLgrad.mif -grad rawencoding.b -set_property Phas
 mv rawdataLRgrad.mif rawdataLR.mif
 mv rawdataRLgrad.mif rawdataRL.mif
 
-
-#if [ $ismosiac = 1 ];
-#then
-
-#	mrconvert rawdataLR.mif rawdataLR.nii -force -nthreads $ncpus
-
-#	nvols=$(fslnvols rawdataLR.nii)
-#	adjvols=$(expr $nvols - 1)
-
-#	fslroi rawdataLR.nii rawdataLRrem 1 $adjvols
-
-#	sed '1d' rawencoding.b > rawencodingrem.b
-#	mrconvert rawdataLRrem.nii.gz rawdataLRrem.mif -force -grad rawencodingrem.b -stride +1,2,3,4 -nthreads $ncpus
-
-#	mv rawdataLRrem.mif rawdataLR.mif
-
-#fi
-
-#if [ $ismosiac = 1 ] && [ $fullreverseseq = 1 ]; then
-
-#	mrconvert rawdataRL.mif rawdataRL.nii -force -nthreads $ncpus
-#	fslroi rawdataRL.nii rawdataRLrem 1 $adjvols
-#	sed '1d' rawrevencoding.b > rawrevencodingrem.b
-#       mrconvert rawdataRLrem.nii.gz rawdataRLrem.mif -force -grad rawrevencodingrem.b -stride +1,2,3,4 -nthreads $ncpus
-#	mv rawdataRLrem.mif rawdataRL.mif
-	
-#else
-	
-#	dwiextract rawdataRL.mif -bzero rawdataRLrem.mif -force
-#	mv rawdataRLrem.mif rawdataRL.mif
-	
-#fi
-
 #Denoise
 
 dwidenoise rawdataLR.mif rawdataLRdn.mif -force -nthreads $ncpus
