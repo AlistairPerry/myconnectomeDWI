@@ -1,44 +1,37 @@
 #!/bin/bash
 #file : segparcT1
-#usage: segparcT1 <subj> <WORKDIR> parctype PRESEGDIR(optional)
-
-#FSparctype options = "DES" (desikan, 68 rois) or DST (destrieux; 148)
-
-FSsubj=sub030
+#usage: segparcT1 <subj> <WORKDIR> CATSEGDIR(optional)
 
 subj=$1
 WORKDIR=$2
-PRESEGDIR=$3
+CATSEGDIR=$3
 
-rundir=$(pwd)
-baserundir=$(basename $rundir)
 
-if [ "$rundir" != "$WORKDIR/Diff/$subj/preproc" ]; then
-cd $WORKDIR/Diff/$subj/preproc
-fi
+mkdir -p $WORKDIR/AnatPrep/${subj}
+cd $WORKDIR/AnatPrep/${subj}
 
 SUBJECTS_DIR=${WORKDIR}/FS
 
 if [ -n "$3" ]; then
 echo "SEGMENTATION HAS ALREADY BEEN PERFORMED"
 
-FSsubjPRESEGDIR=${WORKDIR}/${PRESEGDIR}/${FSsubj}
+subjCATSEGDIR=${WORKDIR}/${CATSEGDIR}/${subj}
 
-echo "Subject segmentations located in ${FSsubjPRESEGDIR}"
+echo "Subject segmentations located in ${subjCATSEGDIR}"
 
 fi
 
 #prepare anatomical volume for segmentation, parcellation correction
 
-mrconvert $SUBJECTS_DIR/$FSsubj/mri/brain.mgz brainFS.nii -stride +1,2,3 -nthreads $ncpus -force
+mrconvert $SUBJECTS_DIR/$subj/mri/brain.mgz brainFS.nii -stride +1,2,3 -nthreads $ncpus -force
 
-mrconvert $SUBJECTS_DIR/$FSsubj/mri/T1.mgz FS.nii -nthreads $ncpus -force
+mrconvert $SUBJECTS_DIR/$subj/mri/T1.mgz FS.nii -nthreads $ncpus -force
 
-rsync /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/Raw/${FSsubj}/T1.nii .
+rsync /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/Raw/${subj}/T1.nii .
 
 bet2  T1.nii T1bet -f 0.15
 
-mrconvert $SUBJECTS_DIR/$FSsubj/mri/brain.mgz brainFSsp.nii -nthreads $ncpus -force
+mrconvert $SUBJECTS_DIR/$subj/mri/brain.mgz brainFSsp.nii -nthreads $ncpus -force
 
 flirt -ref T1bet.nii.gz -in brainFSsp.nii -dof 6 -out FS2FSL -omat FS2FSL.mat
 
@@ -56,17 +49,17 @@ fast -B --nopve T1betFSmasked.nii.gz
 if [ -n "$3" ]; then
 echo "SEGMENTATION already performed | expect tissues to have filenames: GM.nii WM.nii CSF.nii"
 
-5ttgen_manual T1.nii 5TT.nii ${FSsubjPRESEGDIR}
+5ttgen_manual T1betFSmasked.nii.gz 5TT.nii $subjCATSEGDIR
 
 else
 
-5ttgen_manual T1.nii 5TT.nii
+5ttgen fsl T1betFSmasked.nii.gz 5TT.nii -premasked -nocrop -sgm_amyg_hipp -force -nocleanup -nthreads $ncpus -tempdir .
 
 fi
 
 5tt2gmwmi 5TT.nii 5TTgmwmi.nii -nthreads $ncpus -force
 
-labelconvert $SUBJECTS_DIR/$FSsubj/mri/aparc.a2009s+aseg.mgz $FREESURFER_HOME/FreeSurferColorLUT.txt $MRTRIX/share/mrtrix3/labelconvert/fs_a2009s.txt parc.nii -nthreads $ncpus -force
+labelconvert $SUBJECTS_DIR/$subj/mri/aparc.a2009s+aseg.mgz $FREESURFER_HOME/FreeSurferColorLUT.txt $MRTRIX/share/mrtrix3/labelconvert/fs_a2009s.txt parc.nii -nthreads $ncpus -force
 
 flirt -ref T1bet.nii.gz -in parc.nii -applyxfm -init FS2FSL.mat -interp nearestneighbour -out parcFSL.nii.gz
 
@@ -85,13 +78,6 @@ rm parcFSLtempstr.nii.gz
 
 #Coregistrations setup
 
-bbregister --s $FSsubj --mov meanbiasb5shellbet.nii.gz --init-fsl --reg register.dat --dti --fslmat diff2FS.mat
-
-transformconvert diff2FS.mat meanbiasb5shellbet.nii.gz $SUBJECTS_DIR/$FSsubj/mri/brain.mgz flirt_import diff2FSMR.mat -force
-
-mrtransform $SUBJECTS_DIR/$FSsubj/mri/brain.mgz rFS.nii -linear diff2FSMR.mat -inverse -force
-
-mrtransform $SUBJECTS_DIR/$FSsubj/mri/brain.mgz rFSrg.nii -linear diff2FSMR.mat -inverse -template fa.nii -force
 
 
 #Move other files from T1 space
@@ -105,16 +91,9 @@ mrtransform 5TTgmwmi.nii 5TTFSspgmwmi.nii -linear FS2FSLMR.mat -inverse -force -
 
 #Now into diff
 
-mrtransform 5TTFSspgmwmi.nii r5TTgmwmi.nii -linear diff2FSMR.mat -inverse -force
-
-mrtransform 5TTFSspmasked.nii r5TT.nii -linear diff2FSMR.mat -inverse -force
 
 convert_xfm -omat FSL2FS.mat -inverse FS2FSL.mat
 
 flirt -ref brainFSsp.nii -in parc_fixsubcort.nii -applyxfm -init FSL2FS.mat -interp nearestneighbour -out parc_fixsubcortFS.nii.gz
 
-convert_xfm -omat FS2diff.mat  -inverse diff2FS.mat
 
-flirt -ref fa.nii -in parc_fixsubcortFS.nii.gz -applyxfm -init FS2diff.mat -out rparc_fixsubcort.nii.gz  -interp nearestneighbour
-
-gunzip -f rparc_fixsubcort.nii.gz

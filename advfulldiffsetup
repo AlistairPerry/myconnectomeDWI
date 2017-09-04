@@ -6,8 +6,9 @@ WORKDIR=$2
 #FS_DIR=$3
 
 #arguments to be set
-parc=DST
+
 numfibers=25M
+outPREFIX=DST
 
 #Full diffusion pipeline, from pre-processing to connectome construction - using the advanced version
 
@@ -18,10 +19,10 @@ advpreproc $subj $WORKDIR
  
 #Segmentation, parcellation and co-registration of T1 images
 
-segparccoregT1 $WORKDIR $parc CATSEG
+intdiffwithanatprep $subj $WORKDIR AnatPrep sub030
 
 #Fiber construction and connectome construction
 
-advfibertrackandcntmecon $subj $WORKDIR $numfibers $parc
+advfibertrackandcntmecon $subj $WORKDIR $numfibers $outPREFIX
 
 
