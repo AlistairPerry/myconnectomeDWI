@@ -15,11 +15,11 @@ outPREFIX=DST
 #Advanced preprocessing
 #Parameters: mosaic fullrevsequence multiband (1 if yes)
 
-advpreproc $subj $WORKDIR
+#advpreproc $subj $WORKDIR
  
 #Segmentation, parcellation and co-registration of T1 images
 
-intdiffwithanatprep $subj $WORKDIR AnatPrep sub030
+#intdiffwithanatprep $subj $WORKDIR AnatPrep sub030
 
 #Fiber construction and connectome construction
 
