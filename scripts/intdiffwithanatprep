@@ -28,9 +28,9 @@ SUBJECTS_DIR=${WORKDIR}/FS
 
 #Coregistrations setup
 
-bbregister --s $FSsubj --mov meanbiasb5shellbet.nii.gz --init-fsl --reg register.dat --dti --fslmat diff2FS.mat
+bbregister --s $FSsubj --mov biasmeanb0bet.nii.gz --init-fsl --reg register.dat --dti --fslmat diff2FS.mat
 
-transformconvert diff2FS.mat meanbiasb5shellbet.nii.gz $SUBJECTS_DIR/$FSsubj/mri/brain.mgz flirt_import diff2FSMR.mat -force
+transformconvert diff2FS.mat biasmeanb0bet.nii.gz $SUBJECTS_DIR/$FSsubj/mri/brain.mgz flirt_import diff2FSMR.mat -force
 
 mrtransform $SUBJECTS_DIR/$FSsubj/mri/brain.mgz rFS.nii -linear diff2FSMR.mat -inverse -force
 
