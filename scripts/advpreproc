@@ -64,23 +64,30 @@ dwipreproc -rpe_all -export_grad_mrtrix adjencoding.b -pe_dir RL allDWIs.mif edd
 #dwiextract eddycorr.mif -bzero - | mrmath -axis 3 - mean eddymeanb0.nii -force -nthreads $ncpus
 #bet2 eddymeanb0.nii eddymeanb0bet -m -f 0.15
 
-dwishellmath eddycorr.mif mean meaneddyshell.mif -nthreads $ncpus -force
+dwiextract eddycorr.mif -nthreads $ncpus -bzero - | mrmath -axis 3 - mean eddymeanb0.nii -force -nthreads $ncpus
 
-mrconvert meaneddyshell.mif meaneddyb5shell.nii -coord 3 0 -nthreads $ncpus -force
+bet2 eddymeanb0.nii eddymeanb0fslbet -m -f 0.15
 
-bet2 meaneddyb5shell.nii meaneddyb5shellbet -m -f 0.15
+dwibiascorrect -mask eddymeanb0fslbet_mask.nii.gz -fsl eddycorr.mif biascorr.mif -nthreads $ncpus -force
 
-dwibiascorrect -mask meaneddyb5shellbet_mask.nii.gz -fsl eddycorr.mif biascorr.mif -nthreads $ncpus -force
 
-dwishellmath biascorr.mif mean meanbiasshell.mif -nthreads $npcus -force
+#create optimal mask
+
+dwi2mask biascorr.mif biasmaskMR.nii -force -nthreads $ncpus
+
+fslmaths eddymeanb0fslbet_mask.nii.gz -mas biasmaskMR.nii iterbrainmask
+
+gunzip iterbrainmask.nii.gz -f
+
 
 #Create tensor and FA images
 
+dwiextract biascorr.mif -nthreads $ncpus -bzero - | mrmath -axis 3 - mean biasmeanb0.nii -force -nthreads $ncpus
 
-mrconvert meanbiasshell.mif meanbiasb5shell.nii -coord 3 0 -nthreads $ncpus -force
+fslmaths biasmeanb0.nii -mas iterbrainmask.nii biasmeanb0masked
 
-bet2 meanbiasb5shell.nii meanbiasb5shellbet -m -f 0.15
+bet2 biasmeanb0masked biasmeanb0bet -f 0.10 -m 
 
-dwi2tensor biascorr.mif dt.mif -mask meanbiasb5shellbet_mask.nii.gz -nthreads $ncpus -force
+dwi2tensor biascorr.mif dt.mif -mask biasmeanb0bet_mask.nii.gz -nthreads $ncpus -force
 
 tensor2metric dt.mif -fa fa.nii -nthreads $ncpus -force
