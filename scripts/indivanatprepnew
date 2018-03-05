@@ -1,0 +1,2 @@
+mri_vol2vol --mov HCPMMP1.nii.gz --targ ../../sub-01/mri/rawavg.mgz --regheader --o HCPinnat.nii --no-save-reg --nearest --keep-precision
+
