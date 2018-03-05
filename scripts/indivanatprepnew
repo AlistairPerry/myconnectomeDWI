@@ -1,3 +1,5 @@
 mri_vol2vol --mov HCPMMP1.nii.gz --targ ../../sub-01/mri/rawavg.mgz --regheader --o HCPinnat.nii --no-save-reg --nearest --keep-precision
 
 antsApplyTransforms -d 3 -i FS/HCPMMP1out/sub-01/HCPinnat.nii -r sub-01_T1w_space-MNI152NLin2009cAsym_preproc.nii -o HCPnat2nlmni.nii -t sub-01_T1w_space-MNI152NLin2009cAsym_warp.h5 -n MultiLabel
+
+labelconvert ../FS/HCPMMP1out/sub-01/HCPMMP1.nii.gz subcortandglasserCombLUT.txt subcortandglasserCombLUT_final.txt parc.nii
