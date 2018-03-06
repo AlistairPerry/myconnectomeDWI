@@ -8,9 +8,8 @@
 subj=$1
 WORKDIR=$2
 AnatPrepDir=$3
-FSsubj=$4
 
-subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}/${FSsubj}
+subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}/sub-01
 
 rundir=$(pwd)
 baserundir=$(basename $rundir)
@@ -19,22 +18,21 @@ if [ "$rundir" != "$WORKDIR/Diff/$subj/preproc" ]; then
 cd $WORKDIR/Diff/$subj/preproc
 fi
 
-SUBJECTS_DIR=${WORKDIR}/FS
+SUBJECTS_DIR=${WORKDIR}/${AnatPrepDir}
 
 #subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}/${FSsubj}
 
-#Prepare
 
 
 #Coregistrations setup
 
-bbregister --s $FSsubj --mov biasmeanb0bet.nii.gz --init-fsl --reg register.dat --dti --fslmat diff2FS.mat
+bbregister --s sub-01 --mov biasmeanb0bet.nii.gz --init-fsl --reg register.dat --dti --fslmat diff2FS.mat
 
-transformconvert diff2FS.mat biasmeanb0bet.nii.gz $SUBJECTS_DIR/$FSsubj/mri/brain.mgz flirt_import diff2FSMR.mat -force
+transformconvert diff2FS.mat biasmeanb0bet.nii.gz $SUBJECTS_DIR/sub-01/mri/brain.mgz flirt_import diff2FSMR.mat -force
 
-mrtransform $SUBJECTS_DIR/$FSsubj/mri/brain.mgz rFS.nii -linear diff2FSMR.mat -inverse -force
+mrtransform $SUBJECTS_DIR/sub-01/mri/brain.mgz rFS.nii -linear diff2FSMR.mat -inverse -force
 
-mrtransform $SUBJECTS_DIR/$FSsubj/mri/brain.mgz rFSrg.nii -linear diff2FSMR.mat -inverse -template fa.nii -force
+mrtransform $SUBJECTS_DIR/sub-01/mri/brain.mgz rFSrg.nii -linear diff2FSMR.mat -inverse -template fa.nii -force
 
 mrconvert rFSrg.nii rFSrgstr.nii -stride +1,2,3 -nthreads $ncpus -force
 
@@ -50,6 +48,6 @@ mrtransform ${subjAnatPrepDir}/5TTFSspmasked.nii r5TT.nii -linear diff2FSMR.mat 
 
 convert_xfm -omat FS2diff.mat -inverse diff2FS.mat
 
-flirt -ref fa.nii -in ${subjAnatPrepDir}/parc_fixsubcortFS.nii.gz -applyxfm -init FS2diff.mat -out rparc_fixsubcort.nii.gz  -interp nearestneighbour
+flirt -ref fa.nii -in ${subjAnatPrepDir}/parc_fixsubcort_innat.nii -applyxfm -init FS2diff.mat -out rparc_fixsubcort.nii.gz  -interp nearestneighbour
 
 gunzip -f rparc_fixsubcort.nii.gz
