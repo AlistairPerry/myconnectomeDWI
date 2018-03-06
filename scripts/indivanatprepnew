@@ -4,3 +4,10 @@ labelconvert ../FS/HCPMMP1out/sub-01/HCPMMP1.nii.gz subcortandglasserCombLUT.txt
 
 antsApplyTransforms -d 3 -i parc.nii -r sub-01_T1w_space-MNI152NLin2009cAsym_preproc.nii -o HCPnat2nlmni.nii -t sub-01_T1w_space-MNI152NLin2009cAsym_warp.h5 -n MultiLabel
 
+mrconvert ./FS/sub-01/mri/brain.mgz brainFSsp.nii -force
+
+labelsgmfix parc.nii brainFSsp.nii HCPMMP1out/subcortandglasserCombLUT_final.txt parc_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads 10 -force
+
+mrconvert parc_fixsubcort.nii parc_fixsubcortstr.nii -stride +1,2,3 -force -nthreads $ncpus
+
+mv parc_fixsubcortstr.nii parc_fixsubcort.nii
