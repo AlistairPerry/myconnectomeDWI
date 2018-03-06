@@ -1,17 +1,32 @@
-mri_vol2vol --mov brain.mgz --targ rawavg.mgz --regheader --o brainFSinraw.nii
+tkregister2 --mov brain.mgz --targ rawavg.mgz --reg register.native.dat --noedit --regheader
 
-tkregister2 --mov rawavg.mgz --targ orig.mgz --reg register.native.dat --fslregout register.native.fsl --noedit --regheader
+mri_vol2vol --mov brain.mgz --targ rawavg.mgz --reg register.native.dat --o brainFSinraw.nii
 
 
 labelconvert ../FS/HCPMMP1out/sub-01/HCPMMP1.nii.gz subcortandglasserCombLUT.txt subcortandglasserCombLUT_final.txt parc.nii
 
 mrconvert brain.mgz brainFSsp.nii -force -nthreads $ncpus
 
-labelsgmfix parc.nii brainFSsp.nii HCPMMP1out/subcortandglasserCombLUT_final.txt parc_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads 10 -force
+mri_vol2vol --mov parc.nii --targ FS/sub-01/mri/rawavg.mgz --reg register.native.dat --o parcnat.nii --nearest --keep-precision
 
 
-mri_vol2vol --mov parc_fixsubcort.nii --targ /mnt/data/alistairp/myconnectome/T1working/FS/sub-01/mri/rawavg.mgz --regheader --no-save-reg --keep-precision --o parc_fixsubcort_innat.nii --nearest
+fslmaths sub-01_T1w_preproc.nii -mas sub-01_T1w_brainmask.nii.gz sub-01_T1w_brain
 
+gunzip sub-01_T1w_brain.nii.gz
+
+labelsgmfix parcnat.nii sub-01_T1w_brain.nii HCPMMP1out/subcortandglasserCombLUT_final.txt parc_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads 10 -force
+
+
+5ttgen fsl sub-01_T1w_brain.nii -premasked -nocrop -sgm_amyg_hipp 5TTtest.nii -nthreads $ncpus
+
+5tt2gmwmi 5TT.nii 5TTgmwmi.nii -nthreads $ncpus -force
+
+
+mri_vol2vol --targ 5TT.nii --mov brain.mgz --o 5TTFSsp.nii --inv --reg register.native.dat
+
+mri_vol2vol --targ 5TTgmwmi.nii --mov brain.mgz --o 5TTFSspgmwmi.nii --inv --reg register.native.dat
+
+mri_vol2vol --targ parc_fixsubcort.nii --mov brain.mgz --o parc_fixsubcortFS.nii --inv --reg register.native.dat
 
 
 
