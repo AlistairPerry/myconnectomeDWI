@@ -28,7 +28,7 @@ subjFSDir=${WORKDIR}/${AnatPrepDir}/FS/sub-01
 
 tkregister2 --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz --reg register.native.dat --noedit --regheader
 
-mri_vol2vol --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz --regheader --o brainFSinnat.nii
+mri_vol2vol --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz --regheader --o brainFSnat.nii
 
 
 labelconvert HCPMMP1.nii.gz subcortandglasserCombLUT.txt subcortandglasserCombLUT_final.txt parc.nii
@@ -38,7 +38,7 @@ mrconvert ${subjFSDir}/mri/brain.mgz brainFSsp.nii -force -nthreads $ncpus
 mri_vol2vol --mov parc.nii --targ ${subjFSDir}/mri/rawavg.mgz --reg register.native.dat --o parcnat.nii --nearest --keep-precision
 
 
-fslmaths sub-01_T1w_preproc.nii -mas sub-01_T1w_brainmask.nii.gz sub-01_T1w_brain
+fslmaths sub-01_T1w_preproc.nii.gz -mas sub-01_T1w_brainmask.nii.gz sub-01_T1w_brain
 
 gunzip sub-01_T1w_brain.nii.gz
 
