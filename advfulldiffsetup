@@ -8,18 +8,18 @@ WORKDIR=$2
 #arguments to be set
 
 numfibers=25M
-outPREFIX=DST
+outPREFIX=glass
 
 #Full diffusion pipeline, from pre-processing to connectome construction - using the advanced version
 
 #Advanced preprocessing
 #Parameters: mosaic fullrevsequence multiband (1 if yes)
 
-#advpreproc $subj $WORKDIR
+advpreproc $subj $WORKDIR
  
 #Segmentation, parcellation and co-registration of T1 images
 
-#intdiffwithanatprep $subj $WORKDIR AnatPrep sub030
+integratewithanatprep $subj $WORKDIR AnatPrep
 
 #Fiber construction and connectome construction
 
