@@ -13,7 +13,7 @@
 export OMP_NUM_THREADS=8
 
 #Load all required software
-module load mrtrix3/nthreads_fix
+module load mrtrix3/AP
 module load freesurfer/6.0.0
 module load ANTs/20160509
 module load fsl/5.0.9_eddy
@@ -31,7 +31,7 @@ tkregister2 --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz 
 mri_vol2vol --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz --regheader --o brainFSnat.nii
 
 
-labelconvert HCPMMP1.nii.gz subcortandglasserCombLUT.txt subcortandglasserCombLUT_final.txt parc.nii
+labelconvert HCPMMP1.nii.gz subcortandglasserCombLUT.txt subcortandglasserCombLUT_final.txt parc.nii -force -nthreads $ncpus
 
 mrconvert ${subjFSDir}/mri/brain.mgz brainFSsp.nii -force -nthreads $ncpus
 
@@ -42,10 +42,10 @@ fslmaths sub-01_T1w_preproc.nii.gz -mas sub-01_T1w_brainmask.nii.gz sub-01_T1w_b
 
 gunzip sub-01_T1w_brain.nii.gz
 
-labelsgmfix parcnat.nii sub-01_T1w_brain.nii HCPMMP1out/subcortandglasserCombLUT_final.txt parcnat_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
+labelsgmfix parcnat.nii sub-01_T1w_brain.nii subcortandglasserCombLUT_final.txt parcnat_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
 
 
-5ttgen fsl sub-01_T1w_brain.nii -premasked -nocrop -sgm_amyg_hipp 5TT.nii -nthreads $ncpus
+5ttgen fsl sub-01_T1w_brain.nii -premasked -nocrop -sgm_amyg_hipp 5TT.nii -nthreads $ncpus -force
 
 5tt2gmwmi 5TT.nii 5TTgmwmi.nii -nthreads $ncpus -force
 
@@ -54,8 +54,7 @@ mri_vol2vol --targ 5TT.nii --mov ${subjFSDir}/mri/brain.mgz --o 5TTFSsp.nii --in
 
 mri_vol2vol --targ 5TTgmwmi.nii --mov ${subjFSDir}/mri/brain.mgz --o 5TTFSspgmwmi.nii --inv --reg register.native.dat
 
-mri_vol2vol --targ parcnat_fixsubcort.nii --mov ${subjFSDir}/mri/brain.mgz --o parcFS_fixsubcort.nii --inv --reg register.native.dat --nearest --keep-precision
-
+mri_vol2vol --targ parcnat_fixsubcort.nii --mov ${subjFSDir}/mri/brain.mgz --o parcFS_fixsubcort.nii --inv --reg register.native.dat --nearest
 
 
 #antsApplyTransforms -d 3 -i parc.nii -r sub-01_T1w_space-MNI152NLin2009cAsym_preproc.nii -o HCPnat2nlmni.nii -t sub-01_T1w_space-MNI152NLin2009cAsym_warp.h5 -n MultiLabel
