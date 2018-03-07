@@ -1,6 +1,6 @@
 #!/bin/bash
 #file : segparcT1
-#usage: segparcT1 <subj> <WORKDIR> parctype PRESEGDIR(optional)
+#usage: segparcT1 <subj> <WORKDIR> AnatPrepDir
 
 #FSparctype options = "DES" (desikan, 68 rois) or DST (destrieux; 148)
 
@@ -9,7 +9,9 @@ subj=$1
 WORKDIR=$2
 AnatPrepDir=$3
 
-subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}/sub-01
+subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}
+subjFSDir=${WORKDIR}/${AnatPrepDir}/FS/sub-01
+SUBJECTS_DIR=${WORKDIR}/${AnatPrepDir}/FS
 
 rundir=$(pwd)
 baserundir=$(basename $rundir)
@@ -17,11 +19,6 @@ baserundir=$(basename $rundir)
 if [ "$rundir" != "$WORKDIR/Diff/$subj/preproc" ]; then
 cd $WORKDIR/Diff/$subj/preproc
 fi
-
-SUBJECTS_DIR=${WORKDIR}/${AnatPrepDir}
-
-#subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}/${FSsubj}
-
 
 
 #Coregistrations setup
@@ -48,6 +45,6 @@ mrtransform ${subjAnatPrepDir}/5TTFSspmasked.nii r5TT.nii -linear diff2FSMR.mat 
 
 convert_xfm -omat FS2diff.mat -inverse diff2FS.mat
 
-flirt -ref fa.nii -in ${subjAnatPrepDir}/parc_fixsubcort_innat.nii -applyxfm -init FS2diff.mat -out rparc_fixsubcort.nii.gz  -interp nearestneighbour
+flirt -ref fa.nii -in ${subjAnatPrepDir}/parcFS_fixsubcort.nii -applyxfm -init FS2diff.mat -out rparc_fixsubcort.nii.gz  -interp nearestneighbour
 
 gunzip -f rparc_fixsubcort.nii.gz
