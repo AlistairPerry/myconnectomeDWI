@@ -40,7 +40,7 @@ mv rFSrgstr.nii rFSrg.nii
 
 mrtransform ${subjAnatPrepDir}/5TTFSspgmwmi.nii r5TTgmwmi.nii -linear diff2FSMR.mat -inverse -force
 
-mrtransform ${subjAnatPrepDir}/5TTFSspmasked.nii r5TT.nii -linear diff2FSMR.mat -inverse -force
+mrtransform ${subjAnatPrepDir}/5TTFSsp.nii r5TT.nii -linear diff2FSMR.mat -inverse -force
 
 
 convert_xfm -omat FS2diff.mat -inverse diff2FS.mat
