@@ -84,9 +84,9 @@ gunzip iterbrainmask.nii.gz -f
 
 dwiextract biascorr.mif -nthreads $ncpus -bzero - | mrmath -axis 3 - mean biasmeanb0.nii -force -nthreads $ncpus
 
-fslmaths biasmeanb0.nii -mas iterbrainmask.nii biasmeanb0masked
+fslmaths biasmeanb0.nii -mas iterbrainmask.nii biasmeanb0bet
 
-bet2 biasmeanb0masked biasmeanb0bet -f 0.10 -m 
+mrconvert iterbrainmask.nii biasmeanb0bet_mask.nii.gz
 
 dwi2tensor biascorr.mif dt.mif -mask biasmeanb0bet_mask.nii.gz -nthreads $ncpus -force
 
