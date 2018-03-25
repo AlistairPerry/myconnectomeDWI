@@ -1,5 +1,16 @@
 
-add detrend to timeseries
+#Add detrend to confounds file
+
+printf "Detrend\n" >> DetrendLinear.txt
+
+for ((i=1;i<=518;i+=1))
+	do 
+	printf "${i}\n" >> DetrendLinear.txt
+done
+
+#Now merge with original from fmriprep
+
+
 
 covariates
 
