@@ -28,10 +28,15 @@ paste DetrendLinear.txt confounds > sub-01_${Sess}_task-rest_run-001_bold_confou
 
 rm DetrendLinear.txt
 
+#Remove 1st line just to be sure
+
+sed '1d' sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend.tsv > sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend_nohead.tsv
+
+
 #Standard confound regression
 #Fields to include: 1,2,14,15,16,17,18,28,29,30,31,32,33
 
-fsl_regfilt -i sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc.nii.gz -o sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed.nii.gz -d sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend.tsv -m sub-01_${Sess}_task-rest_run-001_bold_space-T1w_brainmask.nii.gz -f "1,2,14,15,16,17,18,28,29,30,31,32,33"
+fsl_regfilt -i sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc.nii.gz -o sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed.nii.gz -d sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend_nohead.tsv -m sub-01_${Sess}_task-rest_run-001_bold_space-T1w_brainmask.nii.gz -f "1,2,14,15,16,17,18,28,29,30,31,32,33"
 
 #Pull out framewise displacement for Mac in order to further regression
 #Field 6 from original confounds file
