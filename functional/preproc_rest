@@ -10,7 +10,7 @@ WORKDIR=$2
 Parc=$3
 Parcname=$4
 
-cd ${WORKDIR}/${subj}/func
+cd ${WORKDIR}/functional/${subj}/func
 
 #Lets go
 #First, add detrend to confounds file
