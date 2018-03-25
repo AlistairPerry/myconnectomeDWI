@@ -4,13 +4,13 @@
 
 # note: for only after minimal preprocessing with fmriprep has been performed..
 
-subj=$1
+Sess=$1
 WORKDIR=$2
 
 Parc=$3
 Parcname=$4
 
-cd ${WORKDIR}/functional/${subj}/func
+cd ${WORKDIR}/functional/${Sess}/func
 
 #Lets go
 #First, add detrend to confounds file
