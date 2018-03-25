@@ -1,4 +1,19 @@
-#Add detrend to confounds file
+#!/bin/bash
+# file: preproc_rest
+# usage: preproc_rest Sess WORKDIR Parc Parcname
+
+# note: for only after minimal preprocessing with fmriprep has been performed..
+
+subj=$1
+WORKDIR=$2
+
+Parc=$3
+Parcname=$4
+
+cd ${WORKDIR}/${subj}/func
+
+#Lets go
+#First, add detrend to confounds file
 
 printf "Detrend\n" >> DetrendLinear.txt
 
@@ -44,4 +59,4 @@ fslmaths sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_smoot
 
 #Extacted timeseries from parcellation region means
 
-fslmeants -i sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_smoothed_filtered.nii.gz --label=${Parc} > sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preprocfull_${parcname}_timeseries.txt
+fslmeants -i sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_smoothed_filtered.nii.gz --label=${Parc} > sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preprocfull_${Parcname}_timeseries.txt
