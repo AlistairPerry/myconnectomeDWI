@@ -15,6 +15,8 @@ cd ${WORKDIR}/functional/${Sess}/func
 #Lets go
 #First, add detrend to confounds file
 
+rm DetrendLinear.txt
+
 printf "Detrend\n" >> DetrendLinear.txt
 
 for ((i=1;i<=518;i+=1))
@@ -24,7 +26,7 @@ done
 
 #Now merge with original from fmriprep
 
-paste DetrendLinear.txt confounds > sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend.tsv
+paste DetrendLinear.txt sub-01_${Sess}_task-rest_run-001_bold_confounds.tsv > sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend.tsv
 
 rm DetrendLinear.txt
 
