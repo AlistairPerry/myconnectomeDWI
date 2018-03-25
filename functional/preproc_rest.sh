@@ -1,49 +1,47 @@
-
 #Add detrend to confounds file
 
 printf "Detrend\n" >> DetrendLinear.txt
 
 for ((i=1;i<=518;i+=1))
-	do 
-	printf "${i}\n" >> DetrendLinear.txt
+        do
+        printf "${i}\n" >> DetrendLinear.txt
 done
 
 #Now merge with original from fmriprep
 
+paste DetrendLinear.txt confounds > sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend.tsv
 
+rm DetrendLinear.txt
 
-covariates
+#Standard confound regression
+#Fields to include: 1,2,14,15,16,17,18,28,29,30,31,32,33
 
-F 1,2,14,15,16,17,18, 28, 29, 30, 31, 32, 33
+fsl_regfilt -i sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc.nii.gz -o sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed.nii.gz -d sub-01_${Sess}_task-rest_run-001_bold_confounds_withdetrend.tsv -m sub-01_${Sess}_task-rest_run-001_bold_space-T1w_brainmask.nii.gz -f "1,2,14,15,16,17,18,28,29,30,31,32,33"
 
+#Pull out framewise displacement for Mac in order to further regression
+#Field 6 from original confounds file
 
+awk -F "/" '{print $6}' sub-01_${Sess}_task-rest_run-001_bold_confounds.tsv > sub-01_${Sess}_task-rest_run-001_bold_confounds_framewisedisplacement.txt
 
-pull out FD for Mac
+#Smoothing
+#Calculate median for brightness threshold settings
 
+mrstats sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed.nii.gz -mask sub-01_${Sess}_task-rest_run-001_bold_space-T1w_brainmask.nii.gz -allvolumes -output median > sub-01_${Sess}_task-rest_run-001_bold_mediansignal.txt
 
-field 6 from orig
+#Brightness threshold calculation
+medboldval=`echo sub-01_${Sess}_task-rest_run-001_bold_mediansignal.txt`
+brightthr=`echo "$medboldval*0.75" | bc -l`
 
+#Susie
+fslmaths sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed.nii.gz -mas sub-01_${Sess}_task-rest_run-001_bold_space-T1w_brainmask.nii.gz sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_masked.nii.gz 
+susan sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_masked.nii.gz $brightthr 8 3 1 sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_smoothed.nii.gz
 
-calculate median
+#Bandpass filtering
+#Set only high band-pass filter
+#Sigma = 43.10 - calculated by 1/(2 * TR [1.16] * 0.10)
 
-mrstats sub-01_ses-044_task-rest_run-001_bold_space-T1w_preproc.nii.gz -mas sub-01_ses-044_task-rest_run-001_bold_space-T1w_brainmask.nii.gz -allvolumes -output median
+fslmaths sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_smoothed.nii.gz -bptf 43.10 sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_smoothed_filtered.nii.gz
 
-susan
+#Extacted timeseries from parcellation region means
 
-brightnessthr median * 0.75
-
-
-susan sub-01_ses-044_task-rest_run-001_bold_space-T1w_preproc.nii.gz [brthr] 8 3 1 susanout
-
-
-band pass 
-
-fslmaths susanout -bptf 43.10 susan_filtered
-
-
-timeseries
-
-  parc
-
-fslmeants -i ${funcfile} --label=${Parc} > ${OutDir}/${Sess}/sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_${parcname}_timeseries.txt
-
+fslmeants -i sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preproc_regressed_smoothed_filtered.nii.gz --label=${Parc} > sub-01_${Sess}_task-rest_run-001_bold_space-T1w_preprocfull_${parcname}_timeseries.txt
