@@ -28,7 +28,7 @@ while read line
 do
 	Sess=$(basename $line)
 	SessDIRECTORY=$line
-	cp dtiblank ${WORKDIR}/batch/${SCRIPT}_$Sess.sh
+	cp funcblank ${WORKDIR}/batch/${SCRIPT}_$Sess.sh
 	sed -i "s;&&&&;$pipedir;" ${WORKDIR}/batch/${SCRIPT}_$Sess.sh
 	sed -i "s/@@@@/$Sess/" ${WORKDIR}/batch/${SCRIPT}_$Sess.sh
 	sed -i "s!????!$SessDIRECTORY!" ${WORKDIR}/batch/${SCRIPT}_$Sess.sh
