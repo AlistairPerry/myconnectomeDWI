@@ -42,7 +42,12 @@ fslmaths sub-01_T1w_preproc.nii.gz -mas sub-01_T1w_brainmask.nii.gz sub-01_T1w_b
 
 gunzip sub-01_T1w_brain.nii.gz
 
-labelsgmfix parcnat.nii sub-01_T1w_brain.nii subcortandglasserCombLUT_final.txt parcnat_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
+
+#use freesurfer SC instead 
+
+cp parcnat.nii parcnat_fixsubcort.nii
+
+#labelsgmfix parcnat.nii sub-01_T1w_brain.nii subcortandglasserCombLUT_final.txt parcnat_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
 
 
 5ttgen fsl sub-01_T1w_brain.nii -premasked -nocrop -sgm_amyg_hipp 5TT.nii -nthreads $ncpus -force
