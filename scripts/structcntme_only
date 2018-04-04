@@ -1,0 +1,41 @@
+#!/bin/bash
+#file : segparcT1
+#usage: segparcT1 <subj> <WORKDIR> AnatPrepDir
+
+subj=$1
+WORKDIR=$2
+AnatPrepDir=$3
+
+subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}
+
+rundir=$(pwd)
+baserundir=$(basename $rundir)
+
+if [ "$rundir" != "$WORKDIR/Diff/$subj/preproc" ]; then
+cd $WORKDIR/Diff/$subj/preproc
+fi
+
+flirt -ref fa.nii -in ${subjAnatPrepDir}/parcFS_fixsubcort.nii -applyxfm -init FS2diff.mat -out rparc_fixsubcort.nii.gz  -interp nearestneighbour
+
+gunzip -f rparc_fixsubcort.nii.gz
+
+
+#Connectome construction
+
+#sifted
+
+tck2connectome 25M.tck rparc_fixsubcort.nii ${CNTMEPREFIX}_streamweights.csv -tck_weights_in sift_weightfactor.txt -assignment_radial_search 2 -zero_diagonal -out_assignments streamlineassignment.txt -force -nthreads $ncpus
+
+tck2connectome 25M.tck rparc_fixsubcort.nii ${CNTMEPREFIX}_invlengthweights.csv -tck_weights_in sift_weightfactor.txt -assignment_radial_search 2 -zero_diagonal -scale_invlength -force -nthreads $ncpus
+
+tck2connectome 25M.tck rparc_fixsubcort.nii ${CNTMEPREFIX}_invnodeweights.csv -tck_weights_in sift_weightfactor.txt -assignment_radial_search 2 -zero_diagonal -scale_invnodevol -force -nthreads $ncpus
+
+tck2connectome 25M.tck rparc_fixsubcort.nii ${CNTMEPREFIX}_meanfiberlengths.csv -tck_weights_in sift_weightfactor.txt -assignment_radial_search 2 -zero_diagonal -scale_length -stat_edge mean -force -nthreads $ncpus
+
+
+#non-sifted
+tck2connectome 25M.tck rparc_fixsubcort.nii ${CNTMEPREFIX}_streamweights_nosift.csv -assignment_radial_search 2 -zero_diagonal -out_assignments streamlineassignment.txt -force -nthreads $ncpus
+
+tck2connectome 25M.tck rparc_fixsubcort.nii ${CNTMEPREFIX}_invlengthweights_nosift.csv -assignment_radial_search 2 -zero_diagonal -scale_invlength -force -nthreads $ncpus
+
+tck2connectome 25M.tck rparc_fixsubcort.nii ${CNTMEPREFIX}_invnodelengthweights_nosift.csv  -assignment_radial_search 2 -zero_diagonal -scale_invlength -scale_invnodevol -force -nthreads $ncpus
