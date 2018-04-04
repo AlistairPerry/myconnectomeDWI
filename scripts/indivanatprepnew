@@ -31,7 +31,7 @@ tkregister2 --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz 
 mri_vol2vol --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz --regheader --o brainFSnat.nii
 
 
-labelconvert HCPMMP1.nii.gz subcortandglasserCombLUT.txt subcortandglasserCombLUT_final.txt parc.nii -force -nthreads $ncpus
+labelconvert HCPMMP1.nii.gz subcortandglasserCOMBLUT_wNA.txt subcortandglasserCombLUT_final_noH.txt parc.nii -force -nthreads $ncpus
 
 mrconvert ${subjFSDir}/mri/brain.mgz brainFSsp.nii -force -nthreads $ncpus
 
