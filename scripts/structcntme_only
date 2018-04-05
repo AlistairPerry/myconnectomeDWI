@@ -5,10 +5,7 @@
 subj=$1
 WORKDIR=$2
 AnatPrepDir=$3
-<<<<<<< HEAD
 CNTMEPREFIX=$4
-=======
->>>>>>> 3c0b2e5b8aef106d16aec1a07bc58143ec07d9df
 
 subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}
 
