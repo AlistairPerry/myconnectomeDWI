@@ -1,0 +1,56 @@
+This version of mrtrix3 is maintained by Alistair Perry in the Breakepear Lab
+This version of mrtrix3 is maintained by Alistair Perry in the Breakepear Lab
+labelconvert: [WARNING] existing output files will be overwritten
+labelconvert: Image "HCPMMP1.nii.gz" stored with signed integer type; need to check for negative values
+labelconvert: uncompressing image "HCPMMP1.nii.gz"...  [=================================================]
+labelconvert: Verifying parcellation image...  [==================================================]
+labelconvert: uncompressing image "HCPMMP1.nii.gz"...  [=================================================]
+mrconvert: [WARNING] existing output files will be overwritten
+mrconvert: uncompressing image "/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/brain.mgz"...  [==============================]
+mrconvert: copying from "/working/l...rep/FS/sub-01/mri/brain.mgz" to "brainFSsp.nii"...  [==================================================]
+labelsgmfix: 
+labelsgmfix: Note that this script makes use of commands / algorithms that have relevant articles for citation; INCLUDING FROM EXTERNAL SOFTWARE PACKAGES. Please consult the help page (-help option) for more information.
+labelsgmfix: 
+labelsgmfix: Generated temporary directory: /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/labelsgmfix-tmp-JTHLUI/
+Command:  mrconvert /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/parcnat.nii /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/labelsgmfix-tmp-JTHLUI/parc.mif
+Command:  mrconvert /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/sub-01_T1w_brain.nii /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/labelsgmfix-tmp-JTHLUI/T1.nii -stride -1,+2,+3
+labelsgmfix: Changing to temporary directory (/mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/labelsgmfix-tmp-JTHLUI/)
+Command:  run_first_all -m none -s R_Thal,L_Puta,R_Caud,R_Hipp,L_Amyg,R_Pall,R_Amyg,L_Caud,L_Pall,L_Thal,L_Hipp,R_Accu,L_Accu,R_Puta -i T1.nii -b -o first
+Command:  mrcalc parc.mif 0 -min sgm.mif
+labelsgmfix: Generating mask images for SGM structures... [======================================================]
+Command:  mrmath R_Thal_mask.mif L_Puta_mask.mif R_Caud_mask.mif R_Hipp_mask.mif L_Amyg_mask.mif R_Pall_mask.mif R_Amyg_mask.mif L_Caud_mask.mif L_Pall_mask.mif L_Thal_mask.mif L_Hipp_mask.mif R_Accu_mask.mif L_Accu_mask.mif R_Puta_mask.mif sum - | mrcalc - 1 -gt sgm_overlap_mask.mif
+Command:  mrcalc sgm_overlap_mask.mif 0 sgm.mif -if sgm_masked.mif
+Command:  labelconvert sgm_masked.mif /software/mrtrix3/mrtrix3-AP/share/mrtrix3/labelsgmfix/FreeSurferSGM.txt /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/subcortandglasserCombLUT_final_noH.txt sgm_new_labels.mif
+labelsgmfix: Replacing SGM parcellations... [======================================================]
+Command:  mrcalc sgm_new_labels.mif 0.5 -gt sgm_new_labels.mif parc.mif -if result.mif -datatype uint32
+Command:  mrconvert result.mif /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/parcnat_fixsubcort.nii
+labelsgmfix: Changing back to original directory (/mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep)
+labelsgmfix: Deleting temporary directory /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/labelsgmfix-tmp-JTHLUI/
+5ttgen: 
+5ttgen: Note that this script makes use of commands / algorithms that have relevant articles for citation; INCLUDING FROM EXTERNAL SOFTWARE PACKAGES. Please consult the help page (-help option) for more information.
+5ttgen: 
+5ttgen: [WARNING] Output file '5TT.nii' already exists; will be overwritten at script completion
+5ttgen: Generated temporary directory: /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/5ttgen-tmp-EY9XXF/
+Command:  mrconvert /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/sub-01_T1w_brain.nii /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/5ttgen-tmp-EY9XXF/input.mif
+5ttgen: Changing to temporary directory (/mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/5ttgen-tmp-EY9XXF/)
+Command:  mrconvert input.mif T1.nii -stride -1,+2,+3
+Command:  fast T1.nii
+Command:  run_first_all -m none -s L_Accu,R_Accu,L_Caud,R_Caud,L_Pall,R_Pall,L_Puta,R_Puta,L_Thal,R_Thal,L_Amyg,R_Amyg,L_Hipp,R_Hipp -i T1.nii -o first -b
+5ttgen: Generating partial volume images for SGM structures... [======================================================]
+Command:  mrmath mesh2pve_L_Accu.mif mesh2pve_R_Accu.mif mesh2pve_L_Caud.mif mesh2pve_R_Caud.mif mesh2pve_L_Pall.mif mesh2pve_R_Pall.mif mesh2pve_L_Puta.mif mesh2pve_R_Puta.mif mesh2pve_L_Thal.mif mesh2pve_R_Thal.mif mesh2pve_L_Amyg.mif mesh2pve_R_Amyg.mif mesh2pve_L_Hipp.mif mesh2pve_R_Hipp.mif sum - | mrcalc - 1.0 -min all_sgms.mif
+Command:  mrthreshold T1_pve_2.nii.gz - -abs 0.001 | maskfilter - connect - -connectivity | mrcalc 1 - 1 -gt -sub remove_unconnected_wm_mask.mif -datatype bit
+Command:  mrcalc T1_pve_0.nii.gz remove_unconnected_wm_mask.mif -mult csf.mif
+Command:  mrcalc 1.0 csf.mif -sub all_sgms.mif -min sgm.mif
+Command:  mrcalc 1.0 csf.mif sgm.mif -add -sub T1_pve_1.nii.gz T1_pve_2.nii.gz -add -div multiplier.mif
+Command:  mrcalc multiplier.mif -finite multiplier.mif 0.0 -if multiplier_noNAN.mif
+Command:  mrcalc T1_pve_1.nii.gz multiplier_noNAN.mif -mult remove_unconnected_wm_mask.mif -mult cgm.mif
+Command:  mrcalc T1_pve_2.nii.gz multiplier_noNAN.mif -mult remove_unconnected_wm_mask.mif -mult wm.mif
+Command:  mrcalc 0 wm.mif -min path.mif
+Command:  mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3 | mrconvert - combined_precrop.mif -stride +2,+3,+4,+1
+Command:  mrconvert combined_precrop.mif result.mif
+Command:  5ttcheck result.mif
+Command:  mrconvert result.mif /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/5TT.nii -force
+5ttgen: Changing back to original directory (/mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep)
+5ttgen: Deleting temporary directory /mnt/lustre/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/5ttgen-tmp-EY9XXF/
+5tt2gmwmi: [WARNING] existing output files will be overwritten
+5tt2gmwmi: Generating GMWMI seed mask...  [==================================================]

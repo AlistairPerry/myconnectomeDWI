@@ -5,6 +5,7 @@
 subj=$1
 WORKDIR=$2
 AnatPrepDir=$3
+CNTMEPREFIX=$4
 
 subjAnatPrepDir=${WORKDIR}/${AnatPrepDir}
 

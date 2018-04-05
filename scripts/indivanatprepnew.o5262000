@@ -1,0 +1,240 @@
+tkregister_tcl /software/freesurfer/freesurfer-6.0.0/tktools/tkregister2.tcl
+target  volume /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/rawavg.mgz
+movable volume /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/brain.mgz
+reg file       register.native.dat
+LoadVol        0
+ZeroCRAS       0
+$Id: tkregister2.c,v 1.132.2.1 2016/08/02 21:17:29 greve Exp $
+Diagnostic Level -1
+INFO: loading target /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/rawavg.mgz
+INFO: target does not conform to COR format, so I'm going to
+reslice to COR. This will not affect the final registration.
+Ttarg: --------------------
+-1.00000   0.00000   0.00000   128.00000;
+ 0.00000   0.00000   1.00000  -128.00000;
+ 0.00000  -1.00000   0.00000   128.00000;
+ 0.00000   0.00000   0.00000   1.00000;
+INFO: loading movable /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/brain.mgz
+Tmov: --------------------
+-0.70000   0.00000   0.00000   112.00000;
+ 0.00000   0.00000   0.70000  -112.00000;
+ 0.00000  -0.70000   0.00000   112.00000;
+ 0.00000   0.00000   0.00000   1.00000;
+mkheaderreg = 1, float2int = 0
+Computing reg from header (and possibly input matrix)
+---- Input registration matrix (computed) --------
+ 1.00000   0.00000   0.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00000;
+ 0.00000   0.00000   1.00000   0.00000;
+ 0.00000   0.00000   0.00000   1.00000;
+---------------------------------------
+---- Input registration matrix --------
+ 1.00000   0.00000   0.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00000;
+ 0.00000   0.00000   1.00000   0.00000;
+ 0.00000   0.00000   0.00000   1.00000;
+Determinant 1
+subject = subject-unknown
+RegMat ---------------------------
+-1.00000   0.00000   0.00000  -0.00001;
+ 0.00000   0.00000  -1.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00001;
+ 0.00000   0.00000   0.00000   1.00000;
+movvol /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/brain.mgz
+targvol /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/rawavg.mgz
+outvol brainFSnat.nii
+invert 0
+tal    0
+talres 2
+regheader 1
+noresample 0
+interp  trilinear (1)
+precision  float (3)
+Gdiag_no  -1
+Synth      0
+SynthSeed  1522977517
+
+Computing registration based on scanner-to-scanner
+
+Final tkRAS-to-tkRAS Matrix is:
+-1.00000   0.00000   0.00000   0.00000;
+ 0.00000   0.00000  -1.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00001;
+ 0.00000   0.00000   0.00000   1.00000;
+
+
+Vox2Vox Matrix is:
+-1.00000   0.00000   0.00000   288.00000;
+ 0.00000   0.00000  -1.00000   320.00000;
+ 0.00000   1.00000   0.00000   0.00002;
+ 0.00000   0.00000   0.00000   1.00000;
+
+Resampling
+Output registration matrix is identity
+
+mri_vol2vol done
+
+Matrix from regfile:
+-1.00000   0.00000   0.00000  -0.00001;
+ 0.00000   0.00000  -1.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00001;
+ 0.00000   0.00000   0.00000   1.00000;
+
+movvol parc.nii
+targvol /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/rawavg.mgz
+outvol parcnat.nii
+regfile register.native.dat
+invert 0
+tal    0
+talres 2
+regheader 0
+noresample 0
+interp  nearest (0)
+precision  float (3)
+Gdiag_no  -1
+Synth      0
+SynthSeed  1523678955
+
+Final tkRAS-to-tkRAS Matrix is:
+-1.00000   0.00000   0.00000  -0.00001;
+ 0.00000   0.00000  -1.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00001;
+ 0.00000   0.00000   0.00000   1.00000;
+
+
+Vox2Vox Matrix is:
+-1.00000   0.00000   0.00000   288.00003;
+ 0.00000   0.00000  -1.00000   320.00000;
+ 0.00000   1.00000   0.00000   0.00002;
+ 0.00000   0.00000   0.00000   1.00000;
+
+Resampling
+Output registration matrix is identity
+
+mri_vol2vol done
+
+Matrix from regfile:
+-1.00000   0.00000   0.00000  -0.00001;
+ 0.00000   0.00000  -1.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00001;
+ 0.00000   0.00000   0.00000   1.00000;
+
+movvol /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/brain.mgz
+targvol 5TT.nii
+outvol 5TTFSsp.nii
+regfile register.native.dat
+invert 1
+tal    0
+talres 2
+regheader 0
+noresample 0
+interp  trilinear (1)
+precision  float (3)
+Gdiag_no  -1
+Synth      0
+SynthSeed  1523642397
+
+Invert!
+Inverting registration
+
+Final tkRAS-to-tkRAS Matrix is:
+-1.00000  -0.00000  -0.00000  -0.00001;
+-0.00000  -0.00000   1.00000  -0.00001;
+-0.00000  -1.00000  -0.00000  -0.00000;
+-0.00000  -0.00000  -0.00000   1.00000;
+
+
+Vox2Vox Matrix is:
+-1.00000   0.00000   0.00000   288.00000;
+ 0.00000   0.00000   1.00000   0.00000;
+ 0.00000  -1.00000   0.00000   320.00000;
+ 0.00000   0.00000   0.00000   1.00000;
+
+Resampling
+Output registration matrix is identity
+
+mri_vol2vol done
+
+Matrix from regfile:
+-1.00000   0.00000   0.00000  -0.00001;
+ 0.00000   0.00000  -1.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00001;
+ 0.00000   0.00000   0.00000   1.00000;
+
+movvol /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/brain.mgz
+targvol 5TTgmwmi.nii
+outvol 5TTFSspgmwmi.nii
+regfile register.native.dat
+invert 1
+tal    0
+talres 2
+regheader 0
+noresample 0
+interp  trilinear (1)
+precision  float (3)
+Gdiag_no  -1
+Synth      0
+SynthSeed  1523387425
+
+Invert!
+Inverting registration
+
+Final tkRAS-to-tkRAS Matrix is:
+-1.00000  -0.00000  -0.00000  -0.00001;
+-0.00000  -0.00000   1.00000  -0.00001;
+-0.00000  -1.00000  -0.00000  -0.00000;
+-0.00000  -0.00000  -0.00000   1.00000;
+
+
+Vox2Vox Matrix is:
+-1.00000   0.00000   0.00000   288.00000;
+ 0.00000   0.00000   1.00000   0.00000;
+ 0.00000  -1.00000   0.00000   320.00000;
+ 0.00000   0.00000   0.00000   1.00000;
+
+Resampling
+Output registration matrix is identity
+
+mri_vol2vol done
+
+Matrix from regfile:
+-1.00000   0.00000   0.00000  -0.00001;
+ 0.00000   0.00000  -1.00000   0.00000;
+ 0.00000   1.00000   0.00000   0.00001;
+ 0.00000   0.00000   0.00000   1.00000;
+
+movvol /working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI/AnatPrep/FS/sub-01/mri/brain.mgz
+targvol parcnat_fixsubcort.nii
+outvol parcFS_fixsubcort.nii
+regfile register.native.dat
+invert 1
+tal    0
+talres 2
+regheader 0
+noresample 0
+interp  nearest (0)
+precision  float (3)
+Gdiag_no  -1
+Synth      0
+SynthSeed  1523606406
+
+Invert!
+Inverting registration
+
+Final tkRAS-to-tkRAS Matrix is:
+-1.00000  -0.00000  -0.00000  -0.00001;
+-0.00000  -0.00000   1.00000  -0.00001;
+-0.00000  -1.00000  -0.00000  -0.00000;
+-0.00000  -0.00000  -0.00000   1.00000;
+
+
+Vox2Vox Matrix is:
+-1.00000   0.00000   0.00000   288.00000;
+ 0.00000   0.00000   1.00000   0.00000;
+ 0.00000  -1.00000   0.00000   320.00000;
+ 0.00000   0.00000   0.00000   1.00000;
+
+Resampling
+Output registration matrix is identity
+
+mri_vol2vol done
