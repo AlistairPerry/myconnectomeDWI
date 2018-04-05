@@ -40,16 +40,26 @@ mri_vol2vol --mov parc.nii --targ ${subjFSDir}/mri/rawavg.mgz --reg register.nat
 
 fslmaths sub-01_T1w_preproc.nii.gz -mas sub-01_T1w_brainmask.nii.gz sub-01_T1w_brain
 
+<<<<<<< HEAD
 gunzip -f sub-01_T1w_brain.nii.gz
+=======
+gunzip sub-01_T1w_brain.nii.gz
+>>>>>>> 3c0b2e5b8aef106d16aec1a07bc58143ec07d9df
 
 
 #use freesurfer SC instead 
 
+<<<<<<< HEAD
 #cp parcnat.nii parcnat_fixsubcort.nii
 
 rm parcnat_fixsubcort.nii
 
 labelsgmfix parcnat.nii sub-01_T1w_brain.nii subcortandglasserCombLUT_final_noH.txt parcnat_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
+=======
+cp parcnat.nii parcnat_fixsubcort.nii
+
+#labelsgmfix parcnat.nii sub-01_T1w_brain.nii subcortandglasserCombLUT_final.txt parcnat_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads $ncpus -force
+>>>>>>> 3c0b2e5b8aef106d16aec1a07bc58143ec07d9df
 
 
 5ttgen fsl sub-01_T1w_brain.nii -premasked -nocrop -sgm_amyg_hipp 5TT.nii -nthreads $ncpus -force
