@@ -1,0 +1,85 @@
+#!/bin/bash
+#Template file which sets up PBS requirements for all jobs
+
+# All required resource statements start with "#PBS -l"
+# These will be interpreted by the job submission system (PBS pro)
+
+#PBS -v ncpus=8,MRTRIX=/opt/software/mrtrix3/rc3
+#PBS -l nodes=1:ppn=8,mem=8G
+# *select* is the number of parallel processes
+# *ncpus* is the number of cores required by each process
+# *mem* is the amount of memory required by each process
+
+#PBS -l walltime=47:00:00
+# *walltime* is the total time required in hours:minutes:seconds
+# to run the job. 
+# Warning: all processes still running at the end of this period
+# of time will be killed and any temporary data will be erased.
+
+#PBS -m abe 
+#NOTE: if you want to receive notifications about job status, enter your email after the "abe" above
+# *m* situations under which to email a) aborted b) begin e) end
+# *M* email address to send emails to
+
+
+#Load all required software
+module load mrtrix3/rc3
+module load freesurfer/6.0.0
+module load ants/2.1.0
+
+#Manually add other software
+FSLDIR=/home/mpib/LNDG/FSL/fsl-5.0.11
+. ${FSLDIR}/etc/fslconf/fsl.sh
+PATH=${FSLDIR}/bin:${PATH}
+export FSLDIR PATH
+
+WORKDIR=/working/lab_michaebr/alistaiP/poldrack/myconnectomedata/wDWI
+AnatPrepDir=AnatPrep
+
+cd ${WORKDIR}/${AnatPrepDir}
+
+subjFSDir=${WORKDIR}/${AnatPrepDir}/FS/sub-030
+
+
+#Transform FS files into nii's
+
+tkregister2 --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz --reg register.native.dat --noedit --regheader
+
+mri_vol2vol --mov ${subjFSDir}/mri/brain.mgz --targ ${subjFSDir}/mri/rawavg.mgz --regheader --o brainFSnat.nii
+
+mrconvert $SUBJECTS_DIR/$subj/mri/brain.mgz brainFS.nii -stride +1,2,3 -nthreads $ncpus -force
+
+
+5ttgen freesurfer ${subjFSDir}/mri/aparc.a2009s+aseg.mgz 5TTFS.nii -nocrop -sgm_amyg_hipp -force -nocleanup -nthreads 1 -tempdir .
+
+5tt2gmwmi 5TTFS.nii 5TTFSgmwmi.nii -nthreads $ncpus -force
+
+
+labelconvert ${subjFSDir}/mri/aparc.a2009s+aseg.mgz ${FREESURFER_HOME}/FreeSurferColorLUT.txt /opt/software/mrtrix3/rc3/share/mrtrix3/labelconvert/fs_a2009s.txt parc.nii -nthreads 1 -force
+
+flirt -ref brainFSnat.nii -in parc.nii -applyxfm -init FS2FSL.mat -interp nearestneighbour -out parcFSL.nii.gz
+
+
+rm parc_fixsubcort.nii
+
+mrconvert parcFSL.nii.gz parcFSLtempstr.nii.gz -stride -1,2,3 -force -nthreads 1
+
+labelsgmfix parcFSLtempstr.nii.gz brainFSnat.nii /opt/software/mrtrix3/rc3/share/mrtrix3/labelconvert/fs_a2009s.txt parc_fixsubcort.nii -sgm_amyg_hipp -premasked -nthreads 1 -force
+
+
+mrconvert parc_fixsubcort.nii parc_fixsubcortstr.nii -stride +1,2,3 -force -nthreads $ncpus
+
+mv parc_fixsubcortstr.nii parc_fixsubcort.nii
+
+rm parcFSLtempstr.nii.gz
+
+
+#Coregistrations setup
+
+#Move other files from T1 space
+
+transformconvert FS2FSL.mat brainFS.nii brainFSnat.nii flirt_import FS2FSLMR.mat -force -nthreads 1
+
+mrtransform 5TTFS.nii 5TTFS.nii -linear FS2FSLMR.mat -force -nthreads 1
+
+mrtransform 5TTFSgmwmi.nii 5TTgmwmi.nii -linear FS2FSLMR.mat -force -nthreads 1
